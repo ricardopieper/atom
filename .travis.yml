@@ -22,7 +22,9 @@ install:
   - nvm install $NODE_VERSION
   - nvm use $NODE_VERSION
 
-script: script/cibuild
+script:
+  - script/build
+  - script/grunt mkdeb
 
 notifications:
   email:

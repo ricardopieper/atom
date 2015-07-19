@@ -174,13 +174,25 @@ class CommandRegistry
   # * `target` The DOM node at which to start bubbling the command event.
   # * `commandName` {String} indicating the name of the command to dispatch.
   dispatch: (target, commandName, detail) ->
+
+
+
     event = new CustomEvent(commandName, {bubbles: true, detail})
-    eventWithTarget = Object.create event,
+    #Object.create event doesn't work fine in chrome 43. See this file in
+    #https://github.com/yuki-takei/atom-using-electron-chrome-42/tree/edd8eec11d605ee77459232a010c1ac8a3a1ec42
+    eventWithTarget = Object.create {},
       target: value: target
       preventDefault: value: ->
       stopPropagation: value: ->
       stopImmediatePropagation: value: ->
+
+
+    #taken from https://github.com/yuki-takei/atom-using-electron-chrome-42/tree/edd8eec11d605ee77459232a010c1ac8a3a1ec42
+    for k, v of event when k not in eventWithTarget
+      eventWithTarget[k] = v
+
     @handleCommandEvent(eventWithTarget)
+
 
   onWillDispatch: (callback) ->
     @emitter.on 'will-dispatch', callback
@@ -203,7 +215,7 @@ class CommandRegistry
     matched = false
     currentTarget = originalEvent.target
 
-    syntheticEvent = Object.create originalEvent,
+    syntheticEvent = Object.create {},
       eventPhase: value: Event.BUBBLING_PHASE
       currentTarget: get: -> currentTarget
       preventDefault: value: ->
@@ -217,6 +229,10 @@ class CommandRegistry
         immediatePropagationStopped = true
       abortKeyBinding: value: ->
         originalEvent.abortKeyBinding?()
+
+    #taken from https://github.com/yuki-takei/atom-using-electron-chrome-42/tree/edd8eec11d605ee77459232a010c1ac8a3a1ec42
+    for k, v of originalEvent when k not in syntheticEvent
+      syntheticEvent[k] = v
 
     @emitter.emit 'will-dispatch', syntheticEvent
 
