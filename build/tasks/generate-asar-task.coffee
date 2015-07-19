@@ -45,7 +45,7 @@ module.exports = (grunt) ->
       builddir: mksnapshotDownloadDir
       snapshotdir: snapshotDir
 
-    asar.createPackageWithOptions appDir, path.resolve(appDir, '..', 'app.asar'), options, (err) ->    
+    asar.createPackageWithOptions appDir, path.resolve(appDir, '..', 'app.asar'), options, (err) ->
       return done(err) if err?
 
       rm appDir

@@ -205,7 +205,7 @@ module.exports = (grunt) ->
       ]
 
     'download-electron':
-      version: packageJson.electron
+      version: packageJson.electronVersion
       outputDir: 'electron'
       downloadDir: electronDownloadDir
       rebuild: true  # rebuild native modules after atom-shell is updated
@@ -232,7 +232,7 @@ module.exports = (grunt) ->
   grunt.registerTask('lint', ['coffeelint', 'csslint', 'lesslint'])
   grunt.registerTask('test', ['shell:kill-atom', 'run-specs'])
 
-  ciTasks = ['output-disk-space', 'download-atom-shell', 'download-atom-shell-chromedriver', 'build']
+  ciTasks = ['output-disk-space', 'download-electron', 'download-electron-chromedriver', 'build']
   ciTasks.push('dump-symbols') if process.platform isnt 'win32'
   ciTasks.push('set-version', 'check-licenses', 'lint', 'generate-asar')
   ciTasks.push('mkdeb') if process.platform is 'linux'
@@ -242,6 +242,9 @@ module.exports = (grunt) ->
   ciTasks.push('publish-build') unless process.env.TRAVIS
   grunt.registerTask('ci', ciTasks)
 
-  defaultTasks = ['download-atom-shell', 'download-atom-shell-chromedriver', 'build', 'set-version', 'generate-asar']
-  defaultTasks.push 'install' unless process.platform is 'linux'
+  defaultTasks = ['download-electron', 'download-electron-chromedriver', 'build', 'set-version', 'generate-asar']
+
+  unless process.platform is 'linux' or grunt.option('no-install')
+   defaultTasks.push 'install'
+
   grunt.registerTask('default', defaultTasks)
